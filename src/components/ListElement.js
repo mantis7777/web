@@ -9,13 +9,6 @@ export default class ListElement extends Component {
     kiekis: '0'
   };
 
-  // updateValue = (e) => {
-  //   console.log(e.target.kiekis);
-  //   // this.setState({kiekis: e.target.value});
-  //   // this.props.handleChange.bind(this, item.id, this.state.kiekis);
-  //   //this.props.handleChange.bind(this, item.id, this.props.value);
-  // }
-
   change = (e, item) => {
     e.preventDefault();
     this.props.handleChange.bind(this, item.id, e.target.value);

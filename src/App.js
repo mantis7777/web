@@ -1,4 +1,9 @@
 import React, { Component } from 'react';
+import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
+import QRCode from 'qrcode';
+import ListElement from './components/ListElement';
+import History from './pages/History.js';
+
 import Button from 'react-bootstrap/Button';
 import Navbar from 'react-bootstrap/Navbar';
 import Nav from 'react-bootstrap/Nav';
@@ -7,16 +12,14 @@ import Container from 'react-bootstrap/Container';
 import Modal from 'react-bootstrap/Modal';
 import Image from 'react-bootstrap/Image';
 import ListGroup from 'react-bootstrap/ListGroup';
-import QRCode from 'qrcode';
 import './App.css';
-import ListElement from './ListElement';
 
 class App extends Component {
   state = {
     show: false,
     link: 'https://linube.com/blog/wp-content/uploads/error-404.jpg',
-    suma: 0.0,
-    paskirtis: 'Kebabine',
+    suma: 0.1,
+    paskirtis: 'Kebabinė',
     itemsList: [
       {
         id: 0,
@@ -49,7 +52,7 @@ class App extends Component {
     this.state.itemsList.forEach(item => {
       total += item.kaina * parseFloat(item.kiekis);
     });
-    this.setState({ suma: total });
+    this.setState({ suma: total }, this.generateQR);
   };
 
   handleClose = () => {
@@ -57,106 +60,129 @@ class App extends Component {
   };
 
   handleShow = () => {
-    this.setState({ show: true });
+    if (this.state.suma !== 0.0) this.setState({ show: true });
   };
 
   generateQR = () => {
-    QRCode.toDataURL((this.state.suma.toFixed(2).toString() + '~' + this.state.paskirtis)
+    QRCode.toDataURL(this.state.paskirtis + '~' + this.state.suma.toFixed(2))
       .then(url => {
-        this.setState({ link: url });
+        this.setState({ link: url }, this.handleShow);
       })
       .catch(err => {
         console.error(err);
       });
-
-    this.caclTotal();
-    this.setState({ show: true });
   };
-
-  setTitle = () => {};
 
   render() {
     return (
-      <div>
-        <Modal show={this.state.show} onHide={this.handleClose}>
-          <Modal.Header closeButton>
-            <Modal.Title>
-              {this.state.paskirtis}: {this.state.suma} €
-            </Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <Image
-              src={this.state.link}
-              style={{
-                display: 'flex',
-                margin: 'auto',
-                width: '200px',
-                height: '200px'
-              }}
-            />
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={this.handleClose}>
-              Atšaukti
-            </Button>
-            <Button variant="primary" onClick={this.handleClose}>
-              Atlikti mokėjimą
-            </Button>
-          </Modal.Footer>
-        </Modal>
-        <Navbar bg="dark" variant="dark">
-          <Navbar.Brand href="#home">Kebabinė</Navbar.Brand>
+      <Router>
+        <Navbar bg="dark" variant="dark" style={{marginBottom: '2%'}}>
+          <Navbar.Brand>
+            <Link to="/" style={{ textDecoration: 'none', color: '#fff' }}>
+              Kebabinė
+            </Link>
+          </Navbar.Brand>
           <Nav className="mr-auto">
-            <Nav.Link href="#home">Pagrindinis</Nav.Link>
-            <Nav.Link href="#features">Savybės</Nav.Link>
-            <Nav.Link href="#pricing">Kainoraštis</Nav.Link>
+            <Link to="/" style={{ textDecoration: 'none', color: '#96bdff' }}>
+              Pagrindinis
+            </Link>
+            <div style={{width: '10px'}} />
+            <Link
+              to="/israsas"
+              style={{ textDecoration: 'none', color: '#96bdff' }}
+            >
+              Kainoraštis
+            </Link>
           </Nav>
         </Navbar>
-
-        <Jumbotron
-          fluid
-          style={{
-            marginLeft: '10%',
-            marginTop: '3%',
-            marginRight: '10%',
-            marginBottom: '3%',
-            backgroundColor: '#5d0784'
-          }}
-        >
-          <Container>
-            <p style={tekstoSpalva}>Sąskaita:</p>
-            <h1 style={{ ...tekstoSpalva, fontWeight: 'bold' }}>23,59 €</h1>
-            <p>
-              <input
-                minLength="1"
-                maxLength="30"
-                type="text"
-                placeholder="Mokėjimo paskirtis"
-                onChange={e => {
-                  var p = e.target.value === '' ? 'Kebabinė' : e.target.value;
-                  this.setState({ paskirtis: p });
+        <Route
+          exact
+          path="/"
+          render={props => (
+            <div>
+              <Modal centered show={this.state.show} onHide={this.handleClose}>
+                <Modal.Header closeButton>
+                  <Modal.Title>
+                    {this.state.paskirtis}: {this.state.suma.toFixed(2)} €
+                  </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                  <Image
+                    src={this.state.link}
+                    style={{
+                      display: 'flex',
+                      margin: 'auto',
+                      width: '200px',
+                      height: '200px'
+                    }}
+                  />
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button variant="secondary" onClick={this.handleClose}>
+                    Atšaukti
+                  </Button>
+                  <Button variant="primary" onClick={this.handleClose}>
+                    Atlikti mokėjimą
+                  </Button>
+                </Modal.Footer>
+              </Modal>
+              <Jumbotron
+                fluid
+                style={{
+                  marginLeft: '10%',
+                  marginTop: '3%',
+                  marginRight: '10%',
+                  marginBottom: '3%',
+                  backgroundColor: '#5d0784'
                 }}
-                style={{ height: '100%', width: '40%', marginBottom: '20px' }}
-              />
-              <br />
-              <Button
-                style={{ backgroundColor: 'green' }}
-                onClick={this.generateQR}
               >
-                Pateikti mokėjimą
-              </Button>
-            </p>
-          </Container>
-        </Jumbotron>
-        <div style={{ marginBottom: '100px' }}>
-          <ListGroup style={{ margin: '10%', marginRight: '40%' }}>
-            <ListElement
-              handleChange={this.handleChange}
-              itemsList={this.state.itemsList}
-            />
-          </ListGroup>
-        </div>
-      </div>
+                <Container>
+                  <p style={tekstoSpalva}>Sąskaita:</p>
+                  <h1 style={{ ...tekstoSpalva, fontWeight: 'bold' }}>
+                    23,59 €
+                  </h1>
+                  <p>
+                    <input
+                      tabIndex="1"
+                      minLength="1"
+                      maxLength="30"
+                      type="text"
+                      placeholder="Mokėjimo paskirtis"
+                      onChange={e => {
+                        var p =
+                          e.target.value === '' ? 'Kebabinė' : e.target.value;
+                        this.setState({ paskirtis: p });
+                      }}
+                      style={{
+                        height: '100%',
+                        width: '40%',
+                        marginBottom: '20px'
+                      }}
+                    />
+                    <br />
+                    <Button
+                      tabIndex="2"
+                      style={{ backgroundColor: 'green' }}
+                      onClick={this.caclTotal}
+                    >
+                      Pateikti mokėjimą
+                    </Button>
+                  </p>
+                </Container>
+              </Jumbotron>
+              <ListGroup
+                style={{ margin: '2%', marginLeft: '10%', marginRight: '10%' }}
+              >
+                <ListElement
+                  handleChange={this.handleChange}
+                  itemsList={this.state.itemsList}
+                />
+              </ListGroup>
+            </div>
+          )}
+        />
+        <Route path="/israsas" component={History} />
+      </Router>
     );
   }
 }
