@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 import QRCode from 'qrcode';
+import axios from 'axios';
 import ListElement from './components/ListElement';
 import History from './pages/History.js';
 
@@ -19,18 +20,43 @@ class App extends Component {
     show: false,
     link: 'https://linube.com/blog/wp-content/uploads/error-404.jpg',
     suma: 0.1,
-    paskirtis: 'Kebabinė',
+    paskirtis: '',
+    shop: {},
     itemsList: [
       {
         id: 0,
-        pavadinimas: 'Kebabas',
-        kaina: 3.25,
+        pavadinimas: 'Kebabas lavaše',
+        kaina: 2.25,
         kiekis: '0'
       },
       {
         id: 1,
-        pavadinimas: 'Pica',
+        pavadinimas: 'Kebabas lėkštėje',
+        kaina: 1.85,
+        kiekis: '0'
+      },
+      {
+        id: 2,
+        pavadinimas: 'Vegetariškas kebabas',
         kaina: 5.49,
+        kiekis: '0'
+      },
+      {
+        id: 3,
+        pavadinimas: 'Turkiškas kebabas',
+        kaina: 3.10,
+        kiekis: '0'
+      },
+      {
+        id: 4,
+        pavadinimas: 'Mėsainis',
+        kaina: 4.42,
+        kiekis: '0'
+      },
+      {
+        id: 5,
+        pavadinimas: 'Arbata',
+        kaina: 1.42,
         kiekis: '0'
       }
     ]
@@ -73,13 +99,21 @@ class App extends Component {
       });
   };
 
+  componentDidMount() {
+    axios
+      .get(
+        'https://mokju-api.azurewebsites.net/api/shops/LT00000000000'
+      )
+      .then(res => this.setState({ shop: res.data, paskirtis: res.data.name }));
+  }
+
   render() {
     return (
       <Router>
         <Navbar bg="dark" variant="dark" style={{marginBottom: '2%'}}>
           <Navbar.Brand>
             <Link to="/" style={{ textDecoration: 'none', color: '#fff' }}>
-              Kebabinė
+              {this.state.shop.name}
             </Link>
           </Navbar.Brand>
           <Nav className="mr-auto">
@@ -139,7 +173,7 @@ class App extends Component {
                 <Container>
                   <p style={tekstoSpalva}>Sąskaita:</p>
                   <h1 style={{ ...tekstoSpalva, fontWeight: 'bold' }}>
-                    23,59 €
+                    {this.state.shop.shopBalance} €
                   </h1>
                   <p>
                     <input
@@ -150,7 +184,7 @@ class App extends Component {
                       placeholder="Mokėjimo paskirtis"
                       onChange={e => {
                         var p =
-                          e.target.value === '' ? 'Kebabinė' : e.target.value;
+                          e.target.value === '' ? this.state.shop.name : e.target.value;
                         this.setState({ paskirtis: p });
                       }}
                       style={{
