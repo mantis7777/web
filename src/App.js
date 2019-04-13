@@ -11,6 +11,7 @@ import Nav from 'react-bootstrap/Nav';
 import Jumbotron from 'react-bootstrap/Jumbotron';
 import Container from 'react-bootstrap/Container';
 import Modal from 'react-bootstrap/Modal';
+import Alert from 'react-bootstrap/Alert';
 import Image from 'react-bootstrap/Image';
 import ListGroup from 'react-bootstrap/ListGroup';
 import './App.css';
@@ -37,14 +38,14 @@ class App extends Component {
       },
       {
         id: 2,
-        pavadinimas: 'Vegetariškas kebabas',
-        kaina: 5.49,
+        pavadinimas: 'Bulvinis kebabas',
+        kaina: 3.69,
         kiekis: '0'
       },
       {
         id: 3,
-        pavadinimas: 'Turkiškas kebabas',
-        kaina: 3.10,
+        pavadinimas: 'Firminis kebabas',
+        kaina: 5.49,
         kiekis: '0'
       },
       {
@@ -90,7 +91,7 @@ class App extends Component {
   };
 
   generateQR = () => {
-    QRCode.toDataURL(this.state.paskirtis + '~' + this.state.suma.toFixed(2))
+    QRCode.toDataURL(this.state.paskirtis + '~' + this.state.suma.toFixed(2) + '~LT012345678901234568')
       .then(url => {
         this.setState({ link: url }, this.handleShow);
       })
@@ -101,16 +102,14 @@ class App extends Component {
 
   componentDidMount() {
     axios
-      .get(
-        'https://mokju-api.azurewebsites.net/api/shops/LT00000000000'
-      )
+      .get('https://mokju-api.azurewebsites.net/api/shops/LT012345678901234568')
       .then(res => this.setState({ shop: res.data, paskirtis: res.data.name }));
   }
 
   render() {
     return (
       <Router>
-        <Navbar bg="dark" variant="dark" style={{marginBottom: '2%'}}>
+        <Navbar bg="dark" variant="dark" style={{ marginBottom: '2%' }}>
           <Navbar.Brand>
             <Link to="/" style={{ textDecoration: 'none', color: '#fff' }}>
               {this.state.shop.name}
@@ -120,12 +119,12 @@ class App extends Component {
             <Link to="/" style={{ textDecoration: 'none', color: '#96bdff' }}>
               Pagrindinis
             </Link>
-            <div style={{width: '10px'}} />
+            <div style={{ width: '10px' }} />
             <Link
               to="/israsas"
               style={{ textDecoration: 'none', color: '#96bdff' }}
             >
-              Kainoraštis
+              Išrašas
             </Link>
           </Nav>
         </Navbar>
@@ -152,11 +151,8 @@ class App extends Component {
                   />
                 </Modal.Body>
                 <Modal.Footer>
-                  <Button variant="secondary" onClick={this.handleClose}>
-                    Atšaukti
-                  </Button>
                   <Button variant="primary" onClick={this.handleClose}>
-                    Atlikti mokėjimą
+                    Atlikta
                   </Button>
                 </Modal.Footer>
               </Modal>
@@ -175,16 +171,17 @@ class App extends Component {
                   <h1 style={{ ...tekstoSpalva, fontWeight: 'bold' }}>
                     {this.state.shop.shopBalance} €
                   </h1>
-                  <p>
                     <input
                       tabIndex="1"
                       minLength="1"
                       maxLength="30"
                       type="text"
-                      placeholder="Mokėjimo paskirtis"
+                      placeholder="Mokėjimo paskirtis (pvz: Už kebabą)"
                       onChange={e => {
                         var p =
-                          e.target.value === '' ? this.state.shop.name : e.target.value;
+                          e.target.value === ''
+                            ? this.state.shop.name
+                            : e.target.value;
                         this.setState({ paskirtis: p });
                       }}
                       style={{
@@ -201,7 +198,15 @@ class App extends Component {
                     >
                       Pateikti mokėjimą
                     </Button>
-                  </p>
+                    {this.state.suma === 0.0 ? (
+                      <Alert
+                        variant="danger"
+                        style={{ marginTop: '30px', width: '50%' }}
+                      >
+                        Pasirinkite bent 1 produktą!
+                      </Alert>
+                    ) : ( <React.Fragment/>
+                    )}
                 </Container>
               </Jumbotron>
               <ListGroup

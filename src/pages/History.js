@@ -13,7 +13,7 @@ export default class History extends Component {
   componentDidMount() {
     axios
       .get(
-        'https://mokju-api.azurewebsites.net/api/payments/shop/LT000ReceiverAccount'
+        'https://mokju-api.azurewebsites.net/api/payments/shop/LT012345678901234568'
       )
       .then(res => this.setState({ hist: res.data }));
   }
