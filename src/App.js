@@ -83,7 +83,10 @@ class App extends Component {
   };
 
   handleClose = () => {
-    this.setState({ show: false });
+    let s = Object.assign({}, this.state.shop);
+    s.shopBalance = this.state.shop.shopBalance +  this.state.suma;
+    console.log(this.state.shop.shopBalance + this.state.suma); 
+    this.setState({ show: false, shop: s});
   };
 
   handleShow = () => {
